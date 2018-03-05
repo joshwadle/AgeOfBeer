@@ -11,9 +11,14 @@ import pyLDAvis.sklearn
 from sklearn.linear_model import Lasso
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
+from datacleaning import Data_Loading
 
-class age_of_beer(object):
+class Shelf_Life(object):
     def __init__(self):
+        '''
+        This is the init function. This just sets up the lists and dictionaries that
+        are needed for the rest of the functions.
+        '''
         self.lin = LinearRegression(fit_intercept=True, alpha = .001, max_iter=1000000, normalize = True, tol = .000001)
         self.lasso = Lasso(fit_intercept = True)
         n_topics = 4
@@ -51,6 +56,9 @@ class age_of_beer(object):
        self.Questionlst = ['clarity','aroma','taste','body','final']
 
    def fit(self, df=self.df):
+       '''
+       This fuction creates two dictionaries that are used for predict and predict_vis
+       '''
        self.df = df
        for Beer in self.Beerlst:
            temp = df[df[Beer] == 1]
@@ -74,13 +82,12 @@ class age_of_beer(object):
                         self.ages[(Beer,Question)] = unique_ages
 
 
-    def predict(self, Beer, Question, Trust, Comment):
-        thismodel = self.models[(Beer,Question)]
-        new_comment = thismodel[0].transform(Comment)
-        topic1, topic2, topic3, topic4, topic5 = thismodel[1].transform(new_comment)
-        return thismodel[3].predict(Trust, topic1, topic2, topic3, topic4, topic5)
 
-    def visualize(self, Beer, Question):
+    def predict(self, Beer, Question):
+        '''
+        This creates and saves a bar graph that shows how the average comment for each topic changes over time
+        for a specific Beer. You can change the place that you want to save the
+        '''
         thismodel = self.models[(Beer,Question)]
         new_comment = thismodel[0].transform(self.df.Comment)
         topic1, topic2, topic3, topic4, topic5 = thismodel[1].transform(new_comment)
@@ -120,22 +127,51 @@ class age_of_beer(object):
         plt.yticks(np.arange(0, 1, .11), fontsize = 20)
         plt.legend((p5[0], p4[0], p3[0], p2[0], p1[0]), ('Worty', 'Metallic', 'True to Brand', 'Too Bitter', 'Too Sweet'), bbox_to_anchor  = (1,.7))
 
-        plt.show()
+        plt.savefig("../Images/{}_{}".format(Beer, Question))
 
     def update(self, df):
+        '''
+        This function updates the DataFrame that all of the functions run on and then calls Fit so that it will update the models
+        '''
         self.df = pd.concact(self.df, df)
         self.df.reset_index(drop=True)
         self.fit()
         pass
 
+    def predict_all(self):
+        for Beer in self.Beerlst:
+            for Question in self.Questionlst:
+                self.predict(Beer, Question)
 
-
+#END CLASS
 
 
 
 def get_top_words(model, feature_names, n_top_words):
+    '''
+    This function is not apart of the class above. This functions
+    '''
     top_words = {}
     for topic_idx, topic in enumerate(model.components_):
         _top_words = [feature_names[i] for i in topic.argsort()[:-n_top_words - 1:-1]]
         top_words[str(topic_idx)] = _top_words
     return(top_words)
+
+if __name__ == '__main__':
+    DL = Data_Loading()
+    if not path.exists('data.pkl'):
+        doclst = DL.Document_List()
+        df = DL.Create_Dataframe(doclst)
+        new_comments = DL.Tokenize_Clean_Strings(df)
+        DL.Clean_Beer_Names(df)
+        DL.Trustworthiness(df)
+        TFIDF = DL.TfidfVectorizer()
+        vectorized = TFIDF.fit_transform(new_comments)
+        df['Vectorized'] = vectorized
+        df.to_pickle('data.pkl')
+    else:
+        df = pd.read_pickle('data.pkl')
+
+    SL = Shelf_Life()
+    SL.fit(df)
+    SL.predict_all()

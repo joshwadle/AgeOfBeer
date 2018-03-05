@@ -7,11 +7,14 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
+
 class Data_Loading(object):
-    def __init__(self):
+    def init(self):
+        if not 'nlp' in locals():
+            print("Loading English Module...")
+            nlp = spacy.load('en')
 
-
-    def Document_List():
+    def Document_List(self):
         '''
         Creates a list of "Documents" that can be passed into Create_Dataframe
         It also passes out a shorter list to test functions on.
@@ -196,19 +199,16 @@ class Data_Loading(object):
 
 
 if __name__ == '__main__':
-    if not 'nlp' in locals():
-        print("Loading English Module...")
-        nlp = spacy.load('en')
-
-    if not path.exists('dataVecReal.pkl'):
-        doclst = Document_List()
-        df = Create_Dataframe(doclst)
-        new_comments = Tokenize_Clean_Strings(df)
-        Clean_Beer_Names(df)
-        Trustworthiness(df)
-        TFIDF = TfidfVectorizer()
+    DL = Data_Loading()
+    if not path.exists('data.pkl'):
+        doclst = DL.Document_List()
+        df = DL.Create_Dataframe(doclst)
+        new_comments = DL.Tokenize_Clean_Strings(df)
+        DL.Clean_Beer_Names(df)
+        DL.Trustworthiness(df)
+        TFIDF = DL.TfidfVectorizer()
         vectorized = TFIDF.fit_transform(new_comments)
         df['Vectorized'] = vectorized
-        df.to_pickle('dataVecReal.pkl')
+        df.to_pickle('data.pkl')
     else:
-        df = pd.read_pickle('dataVecReal.pkl')
+        df = pd.read_pickle('data.pkl')
