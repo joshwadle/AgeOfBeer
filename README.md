@@ -40,22 +40,8 @@ How these topics change over time is what is really interesting. The below plot 
 
 Figure 3 shows shows the how the topics can change over time for a specific beer. This graph was actually created from one batch of beer with the cumulative comments from months 9, 12 and 15.
 
-#### MODELS ####
-In the course of this project I used a variety of models to see what would give me the best predictor of how old a beer is based on taste. The results for this were not as good as I hoped but I belive that this is due to the lack of older beers to get a good I used Naive Bayes, Random Forest, XGBoost, MLP, and then a Lasso Regression. The most consistent results came from a Lasso Regression on the precent of each topic present in each comment from my LDA model for each Beer and Question. Some beers preformed a lot better than others.
-
-#### Lasso Regression ####
-The Lasso Regression was the model that gave the best results across all of the Beers I was analyzing. A Lasso regression is a way to make a linear regression that will penalize features that are large. This penalty is used so that if one feature is collinear with another it will not effect the regression. Below figure 4 is a plot of the residuals for a test set versus the predictions for that test set.
-
-![Residuals](Images/Risidual_plot.png)
-##### Figure 4: Plot of the Residuals from a Lasso Regression #####
-
-These residuals are the errors that this Lasso Regression doesn't account for. This is just a randomly chosen residual plot for one of the beers.
-
 ## Final Product ##
 The final product is an app that is apart of New Belgiums intranet. This app can update automatically when given new information about a specific type of beer. This update feature will allow New Belgium to continue using my models and predictions when they have the missing data.
 
-## FUTURE ##
-I believe that there are trends in this data but with the lack of time difference to accurately see the. I think we would need to collect data for around 2 years to start to see really predictive results. 
-
-## Thanks##
+## Thanks ##
 Thanks to New Belgium Brewery for providing the tasting comments. Thanks to Jan and Matt for making this project possible.
